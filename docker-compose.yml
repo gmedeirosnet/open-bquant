@@ -1,0 +1,127 @@
+services:
+  # ─────────────── Database ────────────────────────────────
+  db:
+    image: timescale/timescaledb:latest-pg16
+    container_name: bquant-db
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-bquant}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-bquant_secret}
+      POSTGRES_DB: ${POSTGRES_DB:-bquant}
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./docker/db/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-bquant} -d ${POSTGRES_DB:-bquant}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - finance-net
+
+  # ─────────────── Redis ───────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    container_name: bquant-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redisdata:/data
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+    networks:
+      - finance-net
+
+  # ─────────────── Backend (FastAPI) ───────────────────────
+  backend:
+    build:
+      context: .
+      dockerfile: docker/backend/Dockerfile
+    container_name: bquant-backend
+    env_file: .env
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app/backend
+      - ./strategies:/app/strategies
+      - ./mybquant:/app/mybquant
+      - ./data:/app/data
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - finance-net
+
+  # ─────────────── JupyterLab ──────────────────────────────
+  jupyter:
+    build:
+      context: .
+      dockerfile: docker/jupyter/Dockerfile
+    container_name: bquant-jupyter
+    env_file: .env
+    ports:
+      - "8888:8888"
+    volumes:
+      - ./notebooks:/app/notebooks
+      - ./backend:/app/backend
+      - ./strategies:/app/strategies
+      - ./mybquant:/app/mybquant
+      - ./data:/app/data
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - finance-net
+
+  # ─────────────── Frontend (React/Vite) ───────────────────
+  frontend:
+    build:
+      context: ./frontend/dashboard
+      dockerfile: ../../docker/frontend/Dockerfile
+    container_name: bquant-frontend
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend/dashboard/src:/app/src
+    environment:
+      - VITE_API_URL=http://localhost/api
+      - VITE_WS_URL=ws://localhost/ws
+    networks:
+      - finance-net
+
+  # ─────────────── Nginx (Reverse Proxy) ───────────────────
+  nginx:
+    image: nginx:alpine
+    container_name: bquant-nginx
+    ports:
+      - "80:80"
+    volumes:
+      - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - backend
+      - frontend
+      - jupyter
+    networks:
+      - finance-net
+
+volumes:
+  pgdata:
+  redisdata:
+
+networks:
+  finance-net:
+    driver: bridge

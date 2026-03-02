@@ -1,0 +1,46 @@
+# ─────────────── API ─────────────────────────────────────
+fastapi>=0.115.0
+uvicorn[standard]>=0.32.0
+pydantic>=2.9.0
+pydantic-settings>=2.6.0
+python-dotenv>=1.0.0
+
+# ─────────────── Database ────────────────────────────────
+sqlalchemy>=2.0.36
+asyncpg>=0.30.0
+alembic>=1.14.0
+psycopg2-binary>=2.9.10
+
+# ─────────────── Cache / Queue ───────────────────────────
+redis[hiredis]>=5.2.0
+celery[redis]>=5.4.0
+
+# ─────────────── Data Sources ────────────────────────────
+yfinance>=0.2.50
+openbb>=4.3.0
+pandas-datareader>=0.10.0
+alpha_vantage>=3.0.0
+python-bcb>=0.3.0
+ccxt>=4.4.0
+
+# ─────────────── Data Manipulation ───────────────────────
+pandas>=2.2.0
+numpy>=1.26.0
+pandas-market-calendars>=4.4.0
+
+# ─────────────── Quantitative / Statistics ───────────────
+scipy>=1.14.0
+statsmodels>=0.14.4
+scikit-learn>=1.6.0
+PyPortfolioOpt>=1.5.6
+pyfolio-reloaded>=0.9.8
+empyrical-reloaded>=0.5.10
+nautilus_trader>=1.207.0
+
+# ─────────────── Logging ─────────────────────────────────
+loguru>=0.7.3
+
+# ─────────────── HTTP Client ─────────────────────────────
+httpx>=0.28.0
+aiohttp>=3.11.0
+requests>=2.32.0

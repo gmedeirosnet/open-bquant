@@ -1,0 +1,71 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.venv/
+venv/
+env/
+build/
+dist/
+*.egg-info/
+.eggs/
+pip-wheel-metadata/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+htmlcov/
+.coverage
+*.cover
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Docker
+.docker/
+
+# Data files (large)
+data/raw/
+data/processed/
+data/cache/
+*.parquet
+*.h5
+*.hdf5
+*.csv
+!tests/**/*.csv
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+
+# Node.js / Frontend
+node_modules/
+dist/
+build/
+.next/
+.nuxt/
+coverage/
+*.local
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+.Spotlight-V100
+.Trashes
+
+# IDE
+.vscode/settings.json
+.idea/
+*.swp
+*.swo
+
+# Logs
+*.log
+logs/
+
+# Migrations (keep versions dir)
+migrations/__pycache__/
